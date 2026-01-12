@@ -5,6 +5,7 @@ import "@/styles/globals.css";
 import { SessionProvider, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Head from "next/head";
+import { Analytics } from "@vercel/analytics/next";
 import { SuccessMessageProvider } from "@/utils/providers/successMessageProvider";
 
 export type NextPageWithLayout<P = Record<string, unknown>> = NextPage<P> & {
@@ -44,6 +45,7 @@ function MyApp({ Component, pageProps }: AppPropsWithLayout) {
             ) : (
               getLayout(<Component {...pageProps} />)
             )}
+            <Analytics />
           </SuccessMessageProvider>
         </SessionProvider>
     </>
