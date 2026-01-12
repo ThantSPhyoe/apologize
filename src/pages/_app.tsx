@@ -29,7 +29,7 @@ function MyApp({ Component, pageProps }: AppPropsWithLayout) {
         <link rel="icon" type="image/png" href="" />
         <link rel="apple-touch-icon" sizes="180x180" href="" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>food recipes</title>
+        <title>apologize to my world</title>
         {/* <meta
           name="description"
           content=""
