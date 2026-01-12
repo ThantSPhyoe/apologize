@@ -59,5 +59,3 @@ npm run dev
 - commit できない
   - `npx tsc --noEmit` これを実行して、型エラーの対応をしてください。
   - `npm run lint -- --fix` これを実行して、出てきたエラーを消してください。
-# apologize
-# apologize
