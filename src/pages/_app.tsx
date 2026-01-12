@@ -6,7 +6,7 @@ import { SessionProvider, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import { SuccessMessageProvider } from "@/utils/providers/successMessageProvider";
-
+import  { Analytics } from '@vercel/analytics/react'; 
 export type NextPageWithLayout<P = Record<string, unknown>> = NextPage<P> & {
   getLayout?: (page: ReactElement) => ReactNode;
   auth?: boolean;
@@ -30,10 +30,6 @@ function MyApp({ Component, pageProps }: AppPropsWithLayout) {
         <link rel="apple-touch-icon" sizes="180x180" href="" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>apologize to my world</title>
-        {/* <meta
-          name="description"
-          content=""
-        /> */}
       </Head>
 
       
@@ -46,6 +42,7 @@ function MyApp({ Component, pageProps }: AppPropsWithLayout) {
             )}
           </SuccessMessageProvider>
         </SessionProvider>
+        <Analytics />
     </>
   );
 }
