@@ -25,11 +25,11 @@ function MyApp({ Component, pageProps }: AppPropsWithLayout) {
     <>
       <Head>
         <meta charSet="UTF-8" />
-        <link rel="icon" type="image/png" href="" />
-        <link rel="icon" type="image/png" href="" />
-        <link rel="apple-touch-icon" sizes="180x180" href="" />
+        <link rel="icon" type="image/png" href="/pp.jpg" />
+        <link rel="icon" type="image/png" href="/pp.jpg" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/pp.jpg" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>apologize to my world</title>
+        <title>requesting loves</title>
       </Head>
 
       
