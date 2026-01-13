@@ -54,7 +54,7 @@ const ApologySection = () => {
               <p
                 key={index}
                 className={`font-display text-xl sm:text-xl md:text-xl text-foreground leading-relaxed transition-all duration-700 ${
-                  isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+                "opacity-100 translate-y-0"
                 }`}
                 style={{ transitionDelay: `${index * 200}ms` }}
               >
