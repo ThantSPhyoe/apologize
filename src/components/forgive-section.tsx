@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Heart } from "lucide-react";
+import { api } from "@/utils/providers/api/api";
 
 interface BurstHeart {
   id: number;
@@ -36,6 +37,15 @@ const ForgiveSection = () => {
     return () => observer.disconnect();
   }, []);
 
+   async function sendMessage() {
+
+    const response = await api.postWithoutAuth({
+      endPoint: "/sendMessage",
+      telegramBotToken: process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN!,
+      sendData: { text: 'I forgive you', chat_id: process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID },
+    });
+  }
+
   const handleYesClick = () => {
     if (accepted) return;
     
@@ -54,6 +64,7 @@ const ForgiveSection = () => {
     }
     setBurstHearts(hearts);
     setAccepted(true);
+    sendMessage();
   };
 
   const handleNoButtonHover = () => {

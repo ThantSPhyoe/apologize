@@ -2,7 +2,7 @@ import { type ReactElement, type ReactNode } from "react";
 import type { NextPage } from "next";
 import type { AppProps } from "next/app";
 import "@/styles/globals.css";
-import { SessionProvider, useSession } from "next-auth/react";
+import { SessionProvider } from "next-auth/react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import { SuccessMessageProvider } from "@/utils/providers/successMessageProvider";
@@ -53,11 +53,6 @@ type AuthProps = {
 
 function Auth({ children }: AuthProps) {
   const router = useRouter();
-  const { status } = useSession({ required: true });
-
-  if (!router.isReady || status === "loading") {
-    return;
-  }
 
   return <>{children}</>;
 }

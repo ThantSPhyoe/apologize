@@ -3,18 +3,18 @@ interface ApiData {
   endPoint: string;
   method?: "POST" | "PUT" | "PATCH" | "GET" | "DELETE";
   sendData?: any;
-  // queryParams?: any;
   queryParams?: [string, string][];
   pathParams?: any;
+  telegramBotToken?: string;
 
-  accessToken?: string; // Bearer token for Authorization header
+  accessToken?: string;
 }
 
 export const api = {
-  postWithoutAuth: async ({ endPoint, method = "POST", sendData }: ApiData) => {
+  postWithoutAuth: async ({ endPoint, method = "POST", sendData, telegramBotToken }: ApiData) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}${endPoint}`,
+        `${process.env.NEXT_PUBLIC_TELE_BASE_URL}/bot${telegramBotToken}${endPoint}`,
         {
           method,
           headers: {
