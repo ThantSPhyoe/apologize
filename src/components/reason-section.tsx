@@ -1,253 +1,224 @@
 import { useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Heart } from "lucide-react";
+import {
+  Heart,
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
+  RotateCcw,
+  RotateCw,
+} from "lucide-react";
 
-interface ReasonSlide {
+interface ReasonItem {
   id: number;
-  image: string;
+  video: string;
   reason: string;
   subtext: string;
 }
 
-const reasons: ReasonSlide[] = [
+const reasons: ReasonItem[] = [
+  // {
+  //   id: 1,
+  //   video: "htaw.MOV",
+  //   reason: "Because your smile lights up my world",
+  //   subtext: "Every time you smile, I fall in love all over again",
+  // },
   {
     id: 1,
-    image: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=800&h=600&fit=crop",
-    reason: "Because your smile lights up my world",
-    subtext: "Every time you smile, I fall in love all over again",
-  },
-  {
-    id: 2,
-    image: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=800&h=600&fit=crop",
+    video: "anni.MP4",
     reason: "Because we've built so many memories",
     subtext: "Each moment with you is a treasure I never want to lose",
   },
   {
-    id: 3,
-    image: "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?w=800&h=600&fit=crop",
+    id: 2,
+    video: "pp.MP4",
     reason: "Because you understand me like no one else",
     subtext: "You see the real me and love me anyway",
   },
   {
-    id: 4,
-    image: "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=800&h=600&fit=crop",
-    reason: "Because our love story isn't finished yet",
-    subtext: "We have so many chapters left to write together",
-  },
-  {
-    id: 5,
-    image: "https://images.unsplash.com/photo-1494774157365-9e04c6720e47?w=800&h=600&fit=crop",
-    reason: "Because you make me want to be better",
-    subtext: "You inspire me to grow every single day",
-  },
-  {
-    id: 6,
-    image: "https://images.unsplash.com/photo-1545389336-cf090694435e?w=800&h=600&fit=crop",
+    id: 3,
+    video: "chatruamu.mov",
     reason: "Because I can't imagine my future without you",
     subtext: "Every dream I have includes you by my side",
   },
+  {
+    id: 4,
+    video: "hand.MOV",
+    reason: "Because you make me want to be better",
+    subtext: "You inspire me to grow every single day",
+  },
 ];
 
-const ReasonsSection = () => {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isVisible, setIsVisible] = useState(false);
-  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
-  const [isAnimating, setIsAnimating] = useState(false);
-  const sectionRef = useRef<HTMLElement>(null);
+const VideoCard = ({ item, index }: { item: ReasonItem; index: number }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
 
+  const [isVisible, setIsVisible] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [isMuted, setIsMuted] = useState(true);
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+
+  /* Fade-in on scroll */
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-        }
-      },
+      ([entry]) => setIsVisible(entry.isIntersecting),
       { threshold: 0.2 }
     );
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
+    if (cardRef.current) observer.observe(cardRef.current);
     return () => observer.disconnect();
   }, []);
 
-  // Auto-slide every 5 seconds
+  /* Sync time + duration */
   useEffect(() => {
-    if (!isVisible) return;
-    
-    const interval = setInterval(() => {
-      if (!isAnimating) {
-        const next = (currentSlide + 1) % reasons.length;
-        goToSlide(next, 'right');
-      }
-    }, 5000);
+    const video = videoRef.current;
+    if (!video) return;
 
-    return () => clearInterval(interval);
-  }, [isVisible, currentSlide, isAnimating]);
+    const updateTime = () => setProgress(video.currentTime);
+    const setMeta = () => setDuration(video.duration);
 
-  const goToSlide = (index: number, direction: 'left' | 'right') => {
-    if (isAnimating || index === currentSlide) return;
-    setIsAnimating(true);
-    setSlideDirection(direction);
-    
-    setTimeout(() => {
-      setCurrentSlide(index);
-      setTimeout(() => setIsAnimating(false), 600);
-    }, 50);
+    video.addEventListener("timeupdate", updateTime);
+    video.addEventListener("loadedmetadata", setMeta);
+
+    return () => {
+      video.removeEventListener("timeupdate", updateTime);
+      video.removeEventListener("loadedmetadata", setMeta);
+    };
+  }, []);
+
+  /* Controls */
+  const togglePlay = () => {
+    if (!videoRef.current) return;
+    isPlaying ? videoRef.current.pause() : videoRef.current.play();
+    setIsPlaying(!isPlaying);
   };
 
-  const nextSlide = () => {
-    const next = (currentSlide + 1) % reasons.length;
-    goToSlide(next, 'right');
+  const toggleMute = () => {
+    if (!videoRef.current) return;
+    videoRef.current.muted = !isMuted;
+    setIsMuted(!isMuted);
   };
 
-  const prevSlide = () => {
-    const prev = (currentSlide - 1 + reasons.length) % reasons.length;
-    goToSlide(prev, 'left');
+  const skip = (seconds: number) => {
+    if (!videoRef.current) return;
+    videoRef.current.currentTime += seconds;
+  };
+
+  const seek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!videoRef.current) return;
+    videoRef.current.currentTime = Number(e.target.value);
+    setProgress(Number(e.target.value));
   };
 
   return (
-    <section ref={sectionRef} className="min-h-screen flex items-center justify-center px-6 py-24 overflow-hidden">
-      <div className="max-w-4xl mx-auto w-full">
-        {/* Section title */}
-        <div className={`text-center mb-16 transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
-          <h2 className="font-display text-3xl sm:text-4xl md:text-5xl text-foreground mb-4">
+    <div
+      ref={cardRef}
+      className={`transition-all duration-700 ${
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
+      }`}
+      style={{ transitionDelay: `${index * 120}ms` }}
+    >
+      <div className="bg-card rounded-3xl shadow-2xl overflow-hidden border border-border/40">
+        {/* Video */}
+        <div className="relative aspect-video">
+          <video
+            ref={videoRef}
+            src={item.video}
+            autoPlay
+            loop
+            muted={isMuted}
+            playsInline
+            className="w-full h-full object-cover bg-black"
+          />
+
+          {/* Overlay play/pause */}
+          <button
+            onClick={togglePlay}
+            className="absolute inset-0 flex items-center justify-center bg-black/0 hover:bg-black/25 transition group"
+          >
+            <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+              {isPlaying ? (
+                <Pause className="text-white w-8 h-8" />
+              ) : (
+                <Play className="text-white w-8 h-8 ml-1" />
+              )}
+            </div>
+          </button>
+
+          {/* Gradient */}
+          <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent pointer-events-none" />
+        </div>
+
+        {/* Controls */}
+        <div className="px-4 py-3 flex items-center gap-3 bg-card/90 backdrop-blur">
+          <button onClick={togglePlay}>
+            {isPlaying ? <Pause size={18} /> : <Play size={18} />}
+          </button>
+
+          <button onClick={() => skip(-10)}>
+            <RotateCcw size={18} />
+          </button>
+
+          <button onClick={() => skip(10)}>
+            <RotateCw size={18} />
+          </button>
+
+          <input
+            type="range"
+            min={0}
+            max={duration || 0}
+            value={progress}
+            onChange={seek}
+            className="flex-1 h-1 accent-primary"
+          />
+
+          <button onClick={toggleMute}>
+            {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+          </button>
+        </div>
+
+        {/* Text */}
+        <div className="p-6 text-center">
+          <Heart className="w-6 h-6 text-primary fill-primary mx-auto mb-4 animate-pulse" />
+          <h3 className="font-display text-xl sm:text-2xl mb-3">
+            {item.reason}
+          </h3>
+          <p className="text-muted-foreground max-w-md mx-auto">
+            {item.subtext}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* =========================
+   Section
+========================= */
+const ReasonsSection = () => {
+  return (
+    <section className="px-6 py-24">
+      <div className="max-w-3xl mx-auto">
+        <div className="text-center mb-16">
+          <h2 className="font-display text-4xl mb-4">
             Why We Should <span className="italic text-primary">Stay Together</span>
           </h2>
-          <p className="font-body text-muted-foreground text-lg">
+          <p className="text-muted-foreground">
             Let me show you, one reason at a time...
           </p>
         </div>
 
-        {/* Board/Card Slider */}
-        <div className={`relative transition-all duration-700 delay-300 ${isVisible ? "opacity-100" : "opacity-0"}`}>
-          {/* Hands holding effect - decorative shadows */}
-          <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-3/4 h-8 bg-foreground/5 rounded-full blur-xl" />
-          
-          {/* Board container */}
-          <div className="relative h-[500px] sm:h-[550px] md:h-[600px] perspective-1000">
-            {reasons.map((slide, index) => {
-              const isCurrent = index === currentSlide;
-              const isPrev = slideDirection === 'right' 
-                ? index === (currentSlide - 1 + reasons.length) % reasons.length
-                : index === (currentSlide + 1) % reasons.length;
-              
-              let transform = 'translateX(100%) rotateY(-15deg)';
-              let opacity = 0;
-              let zIndex = 0;
-              
-              if (isCurrent) {
-                transform = 'translateX(0) rotateY(0deg)';
-                opacity = 1;
-                zIndex = 10;
-              } else if (isPrev && isAnimating) {
-                transform = slideDirection === 'right' 
-                  ? 'translateX(-100%) rotateY(15deg)' 
-                  : 'translateX(100%) rotateY(-15deg)';
-                opacity = 0;
-                zIndex = 5;
-              }
+        <div className="space-y-12">
+          {reasons.map((item, index) => (
+            <VideoCard key={item.id} item={item} index={index} />
+          ))}
+        </div>
 
-              return (
-                <div
-                  key={slide.id}
-                  className="absolute inset-0 transition-all duration-700 ease-out"
-                  style={{
-                    transform,
-                    opacity,
-                    zIndex,
-                    transformStyle: 'preserve-3d',
-                  }}
-                >
-                  {/* The Board */}
-                  <div className="relative h-full mx-auto max-w-md bg-card rounded-2xl shadow-2xl overflow-hidden border-8 border-card">
-                    {/* Wood texture overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-love-cream/50 to-love-blush/30 pointer-events-none" />
-                    
-                    {/* Photo */}
-                    <div className="relative h-3/5 overflow-hidden">
-                      <img
-                        src={slide.image}
-                        alt={slide.reason}
-                        className="w-full h-full object-cover"
-                      />
-                      {/* Soft vignette */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
-                    </div>
-
-                    {/* Reason text */}
-                    <div className="relative h-2/5 p-6 flex flex-col items-center justify-center text-center">
-                      {/* Decorative heart */}
-                      <Heart className="w-6 h-6 text-primary fill-primary mb-4 animate-pulse-gentle" />
-                      
-                      {/* Reason */}
-                      <h3 className="font-display text-xl sm:text-2xl text-foreground mb-3 leading-tight">
-                        {slide.reason}
-                      </h3>
-                      
-                      {/* Subtext */}
-                      <p className="font-body text-muted-foreground text-sm sm:text-base">
-                        {slide.subtext}
-                      </p>
-                    </div>
-
-                    {/* Corner decorations */}
-                    <div className="absolute top-4 left-4 w-8 h-8 border-t-2 border-l-2 border-primary/20 rounded-tl-lg" />
-                    <div className="absolute top-4 right-4 w-8 h-8 border-t-2 border-r-2 border-primary/20 rounded-tr-lg" />
-                    <div className="absolute bottom-4 left-4 w-8 h-8 border-b-2 border-l-2 border-primary/20 rounded-bl-lg" />
-                    <div className="absolute bottom-4 right-4 w-8 h-8 border-b-2 border-r-2 border-primary/20 rounded-br-lg" />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Navigation */}
-          <div className="mt-8 flex items-center justify-center gap-6">
-            {/* Prev button */}
-            <button
-              onClick={prevSlide}
-              disabled={isAnimating}
-              className="p-4 rounded-full bg-card shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 disabled:opacity-50 disabled:scale-100"
-              aria-label="Previous reason"
-            >
-              <ChevronLeft className="w-6 h-6 text-foreground" />
-            </button>
-
-            {/* Dots */}
-            <div className="flex items-center gap-3">
-              {reasons.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => goToSlide(index, index > currentSlide ? 'right' : 'left')}
-                  disabled={isAnimating}
-                  className={`transition-all duration-500 rounded-full ${
-                    index === currentSlide 
-                      ? "w-10 h-3 bg-primary" 
-                      : "w-3 h-3 bg-muted-foreground/30 hover:bg-primary/50"
-                  }`}
-                  aria-label={`Go to reason ${index + 1}`}
-                />
-              ))}
-            </div>
-
-            {/* Next button */}
-            <button
-              onClick={nextSlide}
-              disabled={isAnimating}
-              className="p-4 rounded-full bg-card shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 disabled:opacity-50 disabled:scale-100"
-              aria-label="Next reason"
-            >
-              <ChevronRight className="w-6 h-6 text-foreground" />
-            </button>
-          </div>
-
-          {/* Counter */}
-          <p className="text-center mt-6 font-display text-muted-foreground">
-            <span className="text-primary text-xl">{currentSlide + 1}</span>
-            <span className="mx-2">/</span>
-            <span>{reasons.length}</span>
-            <span className="ml-2 text-sm">reasons to stay</span>
+        <div className="text-center mt-16">
+          <Heart className="w-8 h-8 text-primary fill-primary mx-auto mb-4" />
+          <p className="font-display text-xl text-muted-foreground">
+            And there are countless more reasons...
           </p>
         </div>
       </div>
