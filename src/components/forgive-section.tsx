@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Heart } from "lucide-react";
 import { api } from "@/utils/providers/api/api";
+import { UAParser } from "ua-parser-js";
 
 interface BurstHeart {
   id: number;
@@ -19,6 +20,7 @@ const ForgiveSection = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const noButtonRef = useRef<HTMLButtonElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [info, setInfo] = useState<any>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -37,14 +39,41 @@ const ForgiveSection = () => {
     return () => observer.disconnect();
   }, []);
 
-   async function sendMessage() {
+  useEffect(() => {
+  if (typeof window === "undefined") return;
 
-    const response = await api.postWithoutAuth({
-      endPoint: "/sendMessage",
-      telegramBotToken: process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN!,
-      sendData: { text: 'I forgive you', chat_id: process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID },
-    });
+  const parser = new UAParser(window.navigator.userAgent);
+  const result = parser.getResult();
+  setInfo(result);
+}, []);
+
+
+   async function sendMessage() {
+  let message = "I will give you one more chance";
+
+  if (info?.device?.type) {
+    const deviceParts = [
+      info.device.type,
+      info.device.model,
+      info.os?.name,
+      info.browser?.name,
+    ].filter(Boolean); // removes undefined / null
+
+    if (deviceParts.length > 0) {
+      message += ` #${deviceParts.join(" ")}`;
+    }
   }
+
+  await api.postWithoutAuth({
+    endPoint: "/sendMessage",
+    telegramBotToken: process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN!,
+    sendData: {
+      text: message,
+      chat_id: process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID,
+    },
+  });
+}
+
 
   const handleYesClick = () => {
     if (accepted) return;
@@ -98,7 +127,7 @@ const ForgiveSection = () => {
                 I need to ask you something important
               </p>
               <p className="font-display text-2xl sm:text-3xl text-primary italic mt-8">
-                Can you forgive me?
+                Can you give me a one more chance please?
               </p>
             </div>
 
